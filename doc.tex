@@ -1,0 +1,145 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[romanian]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\definecolor{codegray}{rgb}{0.95,0.95,0.95}
+
+\lstset{
+    backgroundcolor=\color{codegray},
+    basicstyle=\ttfamily\small,
+    frame=single,
+    breaklines=true,
+    captionpos=b
+}
+
+\title{\textbf{Ceas Arduino sincronizat prin Serial cu alarmă, servo și LCD}}
+\author{Ionica Larisa-Cristina}
+\date{01.01.2026}
+
+\begin{document}
+\maketitle
+
+\section{Introducere}
+Acest proiect implementează un sistem de tip ceas digital realizat pe platforma Arduino, care primește ora curentă prin interfața serială, o afișează pe un display LCD și declanșează alarme la ore prestabilite. La activarea alarmei sunt controlate simultan mai multe periferice: un buzzer pentru redarea unei melodii, un LED și un servomotor.
+
+Proiectul ilustrează utilizarea comunicației seriale, a temporizării software, precum și integrarea mai multor componente hardware într-un singur sistem embedded.
+
+\section{Componente hardware utilizate}
+\begin{itemize}
+    \item Placă Arduino (UNO sau compatibil)
+    \item Display LCD 16x2
+    \item Buzzer activ sau pasiv
+    \item LED
+    \item 2 servomotoare
+    \item Rezistențe și fire de conexiune
+\end{itemize}
+
+\section{Biblioteci utilizate}
+Pentru implementarea funcționalităților au fost utilizate următoarele biblioteci:
+\begin{itemize}
+    \item \texttt{LiquidCrystal} – pentru controlul display-ului LCD
+    \item \texttt{Servo} – pentru controlul servomotoarelor
+\end{itemize}
+
+\section{Descriere generală a funcționării}
+Sistemul funcționează în următoarele etape:
+\begin{enumerate}
+    \item Arduino așteaptă primirea timpului în format \texttt{HH:MM:SS} prin interfața serială.
+    \item După validarea formatului, timpul este convertit în secunde și sincronizat intern.
+    \item La fiecare secundă, timpul este incrementat software folosind funcția \texttt{millis()}.
+    \item Ora curentă este afișată pe LCD.
+    \item La ore prestabilite, sistemul declanșează o alarmă:
+    \begin{itemize}
+        \item LED-ul se aprinde
+        \item este redată o melodie pe buzzer
+        \item servomotorul se rotește între 0° și 180°
+    \end{itemize}
+\end{enumerate}
+
+\section{Sincronizarea timpului}
+Timpul este transmis de la calculator către Arduino prin portul serial. Arduino verifică:
+\begin{itemize}
+    \item lungimea șirului (8 caractere)
+    \item existența caracterului \texttt{:} pe pozițiile corecte
+\end{itemize}
+
+După validare, ora este convertită în secunde folosind relația:
+\[
+t = ore \cdot 3600 + minute \cdot 60 + secunde
+\]
+
+\section{Afișarea pe LCD}
+Display-ul LCD este utilizat în modul 16x2:
+\begin{itemize}
+    \item Linia 1: mesaj de stare
+    \item Linia 2: ora curentă în format \texttt{HH:MM}
+\end{itemize}
+
+Actualizarea afișajului se face o dată pe secundă.
+
+\section{Alarmele}
+Sunt definite două momente de alarmă:
+\begin{itemize}
+    \item Ora 06:58:01
+    \item Ora 20:06:01
+\end{itemize}
+
+La declanșarea alarmei:
+\begin{enumerate}
+    \item LED-ul este aprins
+    \item Melodia este redată prin buzzer
+    \item Servomotorul execută o mișcare completă
+    \item LED-ul este stins
+\end{enumerate}
+
+Pentru a evita reactivarea imediată, timpul este incrementat artificial cu 20 de secunde.
+
+\section{Melodia}
+Melodia este definită sub forma unui vector care conține:
+\begin{itemize}
+    \item frecvența notei
+    \item durata relativă a notei
+\end{itemize}
+
+Durata fiecărei note este calculată în funcție de tempo:
+\[
+durata = \frac{60000 \cdot 4}{tempo \cdot divider}
+\]
+
+\section{Controlul servomotorului}
+Servomotorul este controlat prin:
+\begin{itemize}
+    \item rotație de la 0° la 180°
+    \item rotație inversă de la 180° la 0°
+\end{itemize}
+
+Mișcarea este realizată incremental pentru a obține o animație fluidă.
+
+\section{Avantaje și limitări}
+\subsection*{Avantaje}
+\begin{itemize}
+    \item Integrare ușoară a mai multor periferice
+    \item Cod clar și modular
+    \item Sincronizare externă a timpului
+\end{itemize}
+
+\subsection*{Limitări}
+\begin{itemize}
+    \item Timpul nu este salvat la reset
+    \item Temporizarea este software, dependentă de \texttt{millis()}
+    \item Comunicarea serială necesită PC
+\end{itemize}
+
+\section{Concluzii}
+Proiectul demonstrează utilizarea eficientă a platformei Arduino pentru realizarea unui sistem de ceas cu alarmă, integrând comunicația serială, afișarea LCD, controlul servo și generarea de sunet. Soluția este potrivită ca proiect educațional pentru înțelegerea sistemelor embedded de bază.
+
+\end{document}
